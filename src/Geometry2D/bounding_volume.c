@@ -1,5 +1,5 @@
-#include "bounding_volume.h"
-#include "rectangle2d.h"
+#include "Geometry2D/bounding_volume.h"
+#include "Geometry2D/rectangle2d.h"
 
 #include <math.h>
 

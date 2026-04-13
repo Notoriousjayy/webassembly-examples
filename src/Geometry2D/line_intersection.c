@@ -1,6 +1,6 @@
 #include "line_intersection.h"
 #include "line2d.h"
-#include "rectangle2d.h"
+#include "Geometry2D/rectangle2d.h"
 #include "point_containment.h"
 #include "geometry2d_internal.h"
 

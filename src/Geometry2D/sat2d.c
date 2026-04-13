@@ -1,5 +1,5 @@
 #include "sat2d.h"
-#include "rectangle2d.h"
+#include "Geometry2D/rectangle2d.h"
 #include "geometry2d_internal.h"
 
 /*******************************************************************************
