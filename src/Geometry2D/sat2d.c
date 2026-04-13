@@ -11,10 +11,10 @@ Interval2D interval2d_from_rectangle(Rectangle2D rect, vec2 axis) {
     vec2 max = rectangle2d_get_max(rect);
 
     vec2 verts[4] = {
-        { min.x, min.y },
-        { min.x, max.y },
-        { max.x, max.y },
-        { max.x, min.y }
+        vec2_make(min.x, min.y),
+        vec2_make(min.x, max.y),
+        vec2_make(max.x, max.y),
+        vec2_make(max.x, min.y)
     };
 
     Interval2D result;
@@ -38,8 +38,8 @@ Interval2D interval2d_from_oriented_rectangle(OrientedRectangle rect, vec2 axis)
     vec2 verts[4] = {
         min,
         max,
-        { min.x, max.y },
-        { max.x, min.y }
+        vec2_make(min.x, max.y),
+        vec2_make(max.x, min.y)
     };
 
     float theta = DEG2RAD(rect.rotation);
@@ -83,8 +83,8 @@ bool overlap_on_axis_oriented_oriented(OrientedRectangle r1, OrientedRectangle r
 
 bool rectangle_rectangle_sat(Rectangle2D r1, Rectangle2D r2) {
     vec2 axes[2] = {
-        { 1, 0 },
-        { 0, 1 }
+        vec2_make(1.0f, 0.0f),
+        vec2_make(0.0f, 1.0f)
     };
 
     for (int i = 0; i < 2; ++i) {
@@ -101,12 +101,12 @@ bool oriented_rectangle_oriented_rectangle_sat(OrientedRectangle r1, OrientedRec
     float theta2 = DEG2RAD(r2.rotation);
 
     vec2 axes[6] = {
-        { 1, 0 },
-        { 0, 1 },
-        rotate_vec2((vec2){1, 0}, theta2),
-        rotate_vec2((vec2){0, 1}, theta2),
-        rotate_vec2((vec2){1, 0}, theta1),
-        rotate_vec2((vec2){0, 1}, theta1)
+        vec2_make(1.0f, 0.0f),
+        vec2_make(0.0f, 1.0f),
+        rotate_vec2(vec2_make(1.0f, 0.0f), theta2),
+        rotate_vec2(vec2_make(0.0f, 1.0f), theta2),
+        rotate_vec2(vec2_make(1.0f, 0.0f), theta1),
+        rotate_vec2(vec2_make(0.0f, 1.0f), theta1)
     };
 
     for (int i = 0; i < 6; ++i) {

@@ -75,7 +75,7 @@ bool line2d_oriented_rectangle(Line2D line, OrientedRectangle rect) {
     };
 
     Rectangle2D local_rect = rectangle2d_create(
-        (Point2D){0, 0},
+        vec2_make(0.0f, 0.0f),
         vec2_scale(rect.half_extents, 2.0f)
     );
 

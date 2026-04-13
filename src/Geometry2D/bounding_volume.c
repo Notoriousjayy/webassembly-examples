@@ -71,5 +71,3 @@ Rectangle2D containing_rectangle(Point2D* points, int count) {
 
     return rectangle2d_from_min_max(min, max);
 }
-
-

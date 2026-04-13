@@ -42,10 +42,12 @@ target_compile_options(testProject PRIVATE
     -Wall
     -Wextra
     -Wpedantic
+    -Wno-experimental
     "SHELL:-sUSE_SDL=3"
 )
 
 target_link_options(testProject PRIVATE
+    -Wno-experimental
     "SHELL:-sUSE_SDL=3"
     "SHELL:-sUSE_WEBGL2=1"
     "SHELL:-sMIN_WEBGL_VERSION=2"
@@ -100,6 +102,3 @@ if(BUILD_WASM_HTML)
     message(STATUS "  - bootstrap.js")
 endif()
 message(STATUS "==================================")
-
-
-

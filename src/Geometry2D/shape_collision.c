@@ -42,7 +42,7 @@ bool circle_oriented_rectangle(Circle circle, OrientedRectangle rect) {
     );
 
     Rectangle2D local_rect = rectangle2d_create(
-        (Point2D){0, 0},
+        vec2_make(0.0f, 0.0f),
         vec2_scale(rect.half_extents, 2.0f)
     );
 
@@ -66,10 +66,10 @@ bool rectangle_oriented_rectangle(Rectangle2D r1, OrientedRectangle r2) {
 
     // Axes to test: 2 from AABB + 2 from oriented rectangle
     vec2 axes[4] = {
-        { 1, 0 },
-        { 0, 1 },
-        rotate_vec2((vec2){1, 0}, theta),
-        rotate_vec2((vec2){0, 1}, theta)
+        vec2_make(1.0f, 0.0f),
+        vec2_make(0.0f, 1.0f),
+        rotate_vec2(vec2_make(1.0f, 0.0f), theta),
+        rotate_vec2(vec2_make(0.0f, 1.0f), theta)
     };
 
     for (int i = 0; i < 4; ++i) {
@@ -84,7 +84,7 @@ bool rectangle_oriented_rectangle(Rectangle2D r1, OrientedRectangle r2) {
 bool oriented_rectangle_oriented_rectangle(OrientedRectangle r1, OrientedRectangle r2) {
     // Transform r2 into r1's local space
     Rectangle2D local_r1 = rectangle2d_create(
-        (Point2D){0, 0},
+        vec2_make(0.0f, 0.0f),
         vec2_scale(r1.half_extents, 2.0f)
     );
 

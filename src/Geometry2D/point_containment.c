@@ -40,7 +40,7 @@ bool point_in_rectangle2d(Point2D point, Rectangle2D rect) {
 bool point_in_oriented_rectangle(Point2D point, OrientedRectangle rect) {
     // Create local-space rectangle (origin at 0,0, size = 2 * half_extents)
     Rectangle2D local_rect = rectangle2d_create(
-        (Point2D){0, 0}, 
+        vec2_make(0.0f, 0.0f), 
         vec2_scale(rect.half_extents, 2.0f)
     );
 

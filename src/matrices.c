@@ -178,10 +178,10 @@ mat4 mat4_fast_inverse(mat4 mat) {
     inverse._42 = inverse._24 = 0.0f;
     inverse._43 = inverse._34 = 0.0f;
 
-    vec3 right    = (vec3){ mat._11, mat._12, mat._13 };
-    vec3 up       = (vec3){ mat._21, mat._22, mat._23 };
-    vec3 forward  = (vec3){ mat._31, mat._32, mat._33 };
-    vec3 position = (vec3){ mat._41, mat._42, mat._43 };
+    vec3 right    = vec3_make(mat._11, mat._12, mat._13);
+    vec3 up       = vec3_make(mat._21, mat._22, mat._23);
+    vec3 forward  = vec3_make(mat._31, mat._32, mat._33);
+    vec3 position = vec3_make(mat._41, mat._42, mat._43);
 
     inverse._41 = -Dot(right, position);
     inverse._42 = -Dot(up, position);
@@ -518,12 +518,12 @@ mat4 mat4_from_column_major_array(const float *mat) {
 /* ---------- translation / scale / accessors ---------- */
 
 mat4 mat4_translation_xyz(float x, float y, float z) {
-    mat4 m = {
+    mat4 m = mat4_make(
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
-           x,    y,    z, 1.0f
-    };
+        x,    y,    z,    1.0f
+    );
     return m;
 }
 
@@ -560,16 +560,16 @@ mat4 mat4_from_mat3(mat3 mat) {
 }
 
 vec3 mat4_get_translation(mat4 mat) {
-    return (vec3){ mat._41, mat._42, mat._43 };
+    return vec3_make(mat._41, mat._42, mat._43);
 }
 
 mat4 mat4_scale_xyz(float x, float y, float z) {
-    mat4 m = {
-           x, 0.0f, 0.0f, 0.0f,
-        0.0f,    y, 0.0f, 0.0f,
-        0.0f, 0.0f,    z, 0.0f,
+    mat4 m = mat4_make(
+        x,    0.0f, 0.0f, 0.0f,
+        0.0f, y,    0.0f, 0.0f,
+        0.0f, 0.0f, z,    0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
-    };
+    );
     return m;
 }
 
@@ -578,7 +578,7 @@ mat4 mat4_scale_vec3(vec3 vec) {
 }
 
 vec3 mat4_get_scale(mat4 mat) {
-    return (vec3){ mat._11, mat._22, mat._33 };
+    return vec3_make(mat._11, mat._22, mat._33);
 }
 
 /* ---------- rotation builders (degrees) ---------- */
@@ -632,12 +632,12 @@ mat4 XRotation(float angle) {
     angle = DEG2RAD(angle);
     float c = cosf(angle);
     float s = sinf(angle);
-    mat4 m = {
+    mat4 m = mat4_make(
         1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f,    c,    s, 0.0f,
-        0.0f,   -s,    c, 0.0f,
+        0.0f, c,    s,    0.0f,
+        0.0f, -s,   c,    0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
-    };
+    );
     return m;
 }
 
@@ -645,11 +645,11 @@ mat3 XRotation3x3(float angle) {
     angle = DEG2RAD(angle);
     float c = cosf(angle);
     float s = sinf(angle);
-    mat3 m = {
+    mat3 m = mat3_make(
         1.0f, 0.0f, 0.0f,
-        0.0f,    c,    s,
-        0.0f,   -s,    c
-    };
+        0.0f, c,    s,
+        0.0f, -s,   c
+    );
     return m;
 }
 
@@ -657,12 +657,12 @@ mat4 YRotation(float angle) {
     angle = DEG2RAD(angle);
     float c = cosf(angle);
     float s = sinf(angle);
-    mat4 m = {
-           c, 0.0f,   -s, 0.0f,
+    mat4 m = mat4_make(
+        c,    0.0f, -s,   0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
-           s, 0.0f,    c, 0.0f,
+        s,    0.0f, c,    0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
-    };
+    );
     return m;
 }
 
@@ -670,11 +670,11 @@ mat3 YRotation3x3(float angle) {
     angle = DEG2RAD(angle);
     float c = cosf(angle);
     float s = sinf(angle);
-    mat3 m = {
-           c, 0.0f,   -s,
+    mat3 m = mat3_make(
+        c,    0.0f, -s,
         0.0f, 1.0f, 0.0f,
-           s, 0.0f,    c
-    };
+        s,    0.0f, c
+    );
     return m;
 }
 
@@ -682,12 +682,12 @@ mat4 ZRotation(float angle) {
     angle = DEG2RAD(angle);
     float c = cosf(angle);
     float s = sinf(angle);
-    mat4 m = {
-           c,    s, 0.0f, 0.0f,
-          -s,    c, 0.0f, 0.0f,
+    mat4 m = mat4_make(
+        c,    s,    0.0f, 0.0f,
+        -s,   c,    0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
-    };
+    );
     return m;
 }
 
@@ -695,11 +695,11 @@ mat3 ZRotation3x3(float angle) {
     angle = DEG2RAD(angle);
     float c = cosf(angle);
     float s = sinf(angle);
-    mat3 m = {
-           c,    s, 0.0f,
-          -s,    c, 0.0f,
+    mat3 m = mat3_make(
+        c,    s,    0.0f,
+        -s,   c,    0.0f,
         0.0f, 0.0f, 1.0f
-    };
+    );
     return m;
 }
 
@@ -707,37 +707,37 @@ mat3 ZRotation3x3(float angle) {
 
 #ifndef NO_EXTRAS
 mat4 mat4_orthogonalize(mat4 mat) {
-    vec3 xAxis = (vec3){ mat._11, mat._12, mat._13 };
-    vec3 yAxis = (vec3){ mat._21, mat._22, mat._23 };
+    vec3 xAxis = vec3_make(mat._11, mat._12, mat._13);
+    vec3 yAxis = vec3_make(mat._21, mat._22, mat._23);
     vec3 zAxis = Cross(xAxis, yAxis);
 
     xAxis = Cross(yAxis, zAxis);
     yAxis = Cross(zAxis, xAxis);
     zAxis = Cross(xAxis, yAxis);
 
-    mat4 m = {
+    mat4 m = mat4_make(
         xAxis.x, xAxis.y, xAxis.z, mat._14,
         yAxis.x, yAxis.y, yAxis.z, mat._24,
         zAxis.x, zAxis.y, zAxis.z, mat._34,
         mat._41, mat._42, mat._43, mat._44
-    };
+    );
     return m;
 }
 
 mat3 mat3_orthogonalize(mat3 mat) {
-    vec3 xAxis = (vec3){ mat._11, mat._12, mat._13 };
-    vec3 yAxis = (vec3){ mat._21, mat._22, mat._23 };
+    vec3 xAxis = vec3_make(mat._11, mat._12, mat._13);
+    vec3 yAxis = vec3_make(mat._21, mat._22, mat._23);
     vec3 zAxis = Cross(xAxis, yAxis);
 
     xAxis = Cross(yAxis, zAxis);
     yAxis = Cross(zAxis, xAxis);
     zAxis = Cross(xAxis, yAxis);
 
-    mat3 m = {
+    mat3 m = mat3_make(
         xAxis.x, xAxis.y, xAxis.z,
         yAxis.x, yAxis.y, yAxis.z,
         zAxis.x, zAxis.y, zAxis.z
-    };
+    );
     return m;
 }
 #endif
@@ -760,12 +760,12 @@ mat4 AxisAngle(vec3 axis, float angle) {
         z *= inv_len;
     }
 
-    mat4 m = {
-        t * (x * x) + c,     t * x * y + s * z, t * x * z - s * y, 0.0f,
-        t * x * y - s * z,   t * (y * y) + c,   t * y * z + s * x, 0.0f,
-        t * x * z + s * y,   t * y * z - s * x, t * (z * z) + c,   0.0f,
-        0.0f,                0.0f,              0.0f,              1.0f
-    };
+    mat4 m = mat4_make(
+        t * (x * x) + c,   t * x * y + s * z, t * x * z - s * y, 0.0f,
+        t * x * y - s * z, t * (y * y) + c,   t * y * z + s * x, 0.0f,
+        t * x * z + s * y, t * y * z - s * x, t * (z * z) + c,   0.0f,
+        0.0f,              0.0f,              0.0f,              1.0f
+    );
     return m;
 }
 
@@ -785,11 +785,11 @@ mat3 AxisAngle3x3(vec3 axis, float angle) {
         z *= inv_len;
     }
 
-    mat3 m = {
-        t * (x * x) + c,     t * x * y + s * z, t * x * z - s * y,
-        t * x * y - s * z,   t * (y * y) + c,   t * y * z + s * x,
-        t * x * z + s * y,   t * y * z - s * x, t * (z * z) + c
-    };
+    mat3 m = mat3_make(
+        t * (x * x) + c,   t * x * y + s * z, t * x * z - s * y,
+        t * x * y - s * z, t * (y * y) + c,   t * y * z + s * x,
+        t * x * z + s * y, t * y * z - s * x, t * (z * z) + c
+    );
     return m;
 }
 
@@ -812,9 +812,9 @@ vec3 mat4_multiply_vector(vec3 vec, mat4 mat) {
 }
 
 vec3 mat3_multiply_vector(vec3 vec, mat3 mat) {
-    vec3 c0 = (vec3){ mat._11, mat._21, mat._31 };
-    vec3 c1 = (vec3){ mat._12, mat._22, mat._32 };
-    vec3 c2 = (vec3){ mat._13, mat._23, mat._33 };
+    vec3 c0 = vec3_make(mat._11, mat._21, mat._31);
+    vec3 c1 = vec3_make(mat._12, mat._22, mat._32);
+    vec3 c2 = vec3_make(mat._13, mat._23, mat._33);
 
     vec3 result;
     result.x = Dot(vec, c0);
@@ -842,29 +842,29 @@ mat4 TransformAxisAngle(vec3 scale, vec3 rotationAxis, float rotationAngle, vec3
 /* ---------- view / projection / ortho ---------- */
 
 mat4 LookAt(vec3 position, vec3 target, vec3 up) {
-    vec3 forward = Normalized((vec3){
+    vec3 forward = Normalized(vec3_make(
         target.x - position.x,
         target.y - position.y,
         target.z - position.z
-    });
+    ));
     vec3 right   = Normalized(Cross(up, forward));
     vec3 newUp   = Cross(forward, right);
 
 #ifdef DO_SANITY_TESTS
     mat4 viewPosition = mat4_translation_vec3(position);
-    mat4 viewOrientation = (mat4){
+    mat4 viewOrientation = mat4_make(
         right.x,   right.y,   right.z,   0.0f,
         newUp.x,   newUp.y,   newUp.z,   0.0f,
         forward.x, forward.y, forward.z, 0.0f,
         0.0f,      0.0f,      0.0f,      1.0f
-    };
+    );
 
     mat4 view = mat4_inverse(mat4_mul(viewOrientation, viewPosition));
     mat4 result =
 #else
     mat4 result =
 #endif
-        (mat4){
+        mat4_make(
             right.x,  newUp.x,  forward.x,  0.0f,
             right.y,  newUp.y,  forward.y,  0.0f,
             right.z,  newUp.z,  forward.z,  0.0f,
@@ -872,7 +872,7 @@ mat4 LookAt(vec3 position, vec3 target, vec3 up) {
             -Dot(newUp, position),
             -Dot(forward, position),
             1.0f
-        };
+        );
 #ifdef DO_SANITY_TESTS
 #ifndef NO_EXTRAS
     if (!mat4_equal(result, view)) {
@@ -914,12 +914,12 @@ mat4 Ortho(float left, float right, float bottom, float top, float zNear, float 
     float _42 = (top + bottom) / (bottom - top);
     float _43 = (zNear) / (zNear - zFar);
 
-    mat4 m = {
-         _11, 0.0f, 0.0f, 0.0f,
-        0.0f,  _22, 0.0f, 0.0f,
-        0.0f, 0.0f,  _33, 0.0f,
-         _41,  _42,  _43, 1.0f
-    };
+    mat4 m = mat4_make(
+        _11,  0.0f, 0.0f, 0.0f,
+        0.0f, _22,  0.0f, 0.0f,
+        0.0f, 0.0f, _33,  0.0f,
+        _41,  _42,  _43,  1.0f
+    );
     return m;
 }
 
@@ -943,7 +943,7 @@ vec3 Decompose(mat3 rot1) {
         z = 0.0f;
     }
 
-    return (vec3){ x, y, z };
+    return vec3_make(x, y, z);
 }
 
 

@@ -461,6 +461,3 @@ void startMainLoop(void)
     printf("[startMainLoop] entering main loop\n");
     emscripten_set_main_loop(tick, 0, 1);
 }
-
-
-

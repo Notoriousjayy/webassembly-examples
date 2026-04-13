@@ -26,10 +26,10 @@
 static inline vec2 rotate_vec2(vec2 v, float theta_rad) {
     float c = cosf(theta_rad);
     float s = sinf(theta_rad);
-    return (vec2){
+    return vec2_make(
         v.x * c + v.y * (-s),
         v.x * s + v.y * c
-    };
+    );
 }
 
 #endif // GEOMETRY2D_INTERNAL_H

@@ -28,6 +28,7 @@ try {
 
   const Module = await createModule({
     canvas,
+    noInitialRun: true,
     print: (text) => console.log(text),
     printErr: (text) => console.error(text)
   });
@@ -41,8 +42,15 @@ try {
     throw new Error("initWebGL returned failure");
   }
 
-  Module.ccall("startMainLoop", null, [], []);
   setStatus("Running");
+
+  try {
+    Module.ccall("startMainLoop", null, [], []);
+  } catch (error) {
+    if (error !== "unwind") {
+      throw error;
+    }
+  }
 } catch (error) {
   console.error("Bootstrap failure:", error);
   setStatus(`Startup failed: ${error instanceof Error ? error.message : String(error)}`);
