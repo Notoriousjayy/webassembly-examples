@@ -1,22 +1,24 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
-#else
-// Define EMSCRIPTEN_KEEPALIVE as empty for native builds
-#define EMSCRIPTEN_KEEPALIVE
-#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Called once at startup to set up GL state & circle vertex buffer
+/*
+ * Browser renderer entry points.
+ *
+ * The project now targets WebAssembly only and initializes an SDL3 + WebGL2
+ * renderer from the JavaScript ES-module bootstrap.
+ */
+
+/* Initialize SDL3, create the GL context, build GPU state, and prepare geometry. */
 EMSCRIPTEN_KEEPALIVE
 int initWebGL(void);
 
-// Begins the main loop that continuously draws the circle
+/* Start the browser-driven main loop. */
 EMSCRIPTEN_KEEPALIVE
 void startMainLoop(void);
 
@@ -24,4 +26,4 @@ void startMainLoop(void);
 }
 #endif
 
-#endif // RENDER_H
+#endif /* RENDER_H */

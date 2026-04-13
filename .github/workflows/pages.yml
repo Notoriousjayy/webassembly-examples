@@ -1,4 +1,4 @@
-# Deploy the optimized WebAssembly build to GitHub Pages
+# Deploy the optimized WebAssembly ES-module build to GitHub Pages
 name: Deploy (GitHub Pages)
 
 on:
@@ -49,9 +49,10 @@ jobs:
         run: |
           mkdir -p site
           cp build-wasm/index.html site/
-          cp build-wasm/index.js site/
-          cp build-wasm/index.wasm site/
-          if [ -f build-wasm/index.data ]; then cp build-wasm/index.data site/; fi
+          cp build-wasm/bootstrap.js site/
+          cp build-wasm/testProject.js site/
+          cp build-wasm/testProject.wasm site/
+          if [ -f build-wasm/testProject.data ]; then cp build-wasm/testProject.data site/; fi
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

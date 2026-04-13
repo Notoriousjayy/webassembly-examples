@@ -5,35 +5,50 @@
   <title>testProject</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    html, body { margin: 0; height: 100%; background: #111; }
-    #canvas { width: 100vw; height: 100vh; display: block; background: #000; }
+    :root {
+      color-scheme: dark;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #111;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
+    }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #000;
+    }
+
+    #status {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 8px 10px;
+      font-size: 14px;
+      color: #e6e6e6;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 8px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
-  <canvas id="canvas" width="800" height="600"></canvas>
+  <div id="app">
+    <canvas id="canvas" width="1280" height="720"></canvas>
+    <div id="status">Loading WebAssembly module…</div>
+  </div>
 
-  <!-- Configure Module before the generated script is injected. -->
-  <script>
-    var Module = {
-      canvas: (function () { return document.getElementById('canvas'); })(),
-      print: function (text) { console.log(text); },
-      printErr: function (text) { console.error(text); },
-      onRuntimeInitialized: function () {
-        try {
-          var ok = Module.ccall('initWebGL', 'number', [], []);
-          if (ok) {
-            Module.ccall('startMainLoop', 'void', [], []);
-          } else {
-            console.error('initWebGL failed');
-          }
-        } catch (e) {
-          console.error('Runtime init error:', e);
-        }
-      }
-    };
-  </script>
-
-  <!-- Required by Emscripten: this placeholder injects the generated JS. -->
-  {{{ SCRIPT }}}
+  <script type="module" src="./bootstrap.js"></script>
 </body>
 </html>

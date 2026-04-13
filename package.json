@@ -1,6 +1,15 @@
 {
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "configure:debug": "emcmake cmake --preset wasm-debug",
+    "build:debug": "cmake --build --preset wasm-debug",
+    "configure:release": "emcmake cmake --preset wasm-release",
+    "build:release": "cmake --build --preset wasm-release",
+    "serve": "http-server build-wasm -p 8000 -c-1 --cors",
+    "dev": "npm run configure:debug && npm run build:debug && npm run serve"
+  },
   "devDependencies": {
-    "http-server": "^14.1.1",
-    "live-server": "^1.2.2"
+    "http-server": "^14.1.1"
   }
 }

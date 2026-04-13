@@ -12,121 +12,28 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-${presetName}",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "BUILD_WASM_HTML": "ON"
       }
     },
     {
       "name": "wasm-debug",
-      "displayName": "Web / Debug (Emscripten)",
+      "displayName": "Web / Debug (Emscripten ES Module)",
       "inherits": "base",
       "binaryDir": "${sourceDir}/build-wasm",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       },
-      "description": "Build for WebAssembly with WebGL2"
+      "description": "Debug WebAssembly build with SDL3 + WebGL2 and modularized ES-module output"
     },
     {
       "name": "wasm-release",
-      "displayName": "Web / Release (Emscripten)",
+      "displayName": "Web / Release (Emscripten ES Module)",
       "inherits": "wasm-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       },
-      "description": "Optimized WebAssembly build"
-    },
-    {
-      "name": "native-debug",
-      "displayName": "Desktop / Debug",
-      "inherits": "base",
-      "binaryDir": "${sourceDir}/build-native",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "USE_SDL3": "ON"
-      },
-      "description": "Native desktop build with SDL3 + OpenGL"
-    },
-    {
-      "name": "native-release",
-      "displayName": "Desktop / Release",
-      "inherits": "native-debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "description": "Optimized native desktop build with SDL3 + OpenGL"
-    },
-    {
-      "name": "native-no-sdl",
-      "displayName": "Desktop / No Renderer",
-      "inherits": "native-debug",
-      "cacheVariables": {
-        "USE_SDL3": "OFF"
-      },
-      "description": "Native build without SDL3 (math / core modules only)"
-    },
-    {
-      "name": "native-sdl3-debug",
-      "hidden": true,
-      "inherits": "native-debug",
-      "description": "Legacy alias for native-debug"
-    },
-    {
-      "name": "native-sdl3-release",
-      "hidden": true,
-      "inherits": "native-release",
-      "description": "Legacy alias for native-release"
-    },
-    {
-      "name": "native-headless",
-      "hidden": true,
-      "inherits": "native-no-sdl",
-      "description": "Legacy alias for native-no-sdl"
-    },
-    {
-      "name": "android-debug",
-      "displayName": "Android / Debug",
-      "inherits": "base",
-      "binaryDir": "${sourceDir}/build-android",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_SYSTEM_NAME": "Android",
-        "CMAKE_ANDROID_API": "24",
-        "CMAKE_ANDROID_ARCH_ABI": "arm64-v8a",
-        "USE_SDL3": "ON"
-      },
-      "description": "Build for Android with SDL3 + OpenGL ES 3.0"
-    },
-    {
-      "name": "android-release",
-      "displayName": "Android / Release",
-      "inherits": "android-debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "description": "Optimized Android build with SDL3 + OpenGL ES 3.0"
-    },
-    {
-      "name": "ios-debug",
-      "displayName": "iOS / Debug",
-      "generator": "Xcode",
-      "binaryDir": "${sourceDir}/build-ios",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_SYSTEM_NAME": "iOS",
-        "CMAKE_OSX_DEPLOYMENT_TARGET": "12.0",
-        "CMAKE_OSX_ARCHITECTURES": "arm64",
-        "CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH": "NO",
-        "USE_SDL3": "ON"
-      },
-      "description": "Build for iOS with SDL3 + OpenGL ES 3.0"
-    },
-    {
-      "name": "ios-release",
-      "displayName": "iOS / Release",
-      "inherits": "ios-debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "description": "Optimized iOS build with SDL3 + OpenGL ES 3.0"
+      "description": "Optimized WebAssembly build with SDL3 + WebGL2 and modularized ES-module output"
     }
   ],
   "buildPresets": [
@@ -139,58 +46,6 @@
       "name": "wasm-release",
       "configurePreset": "wasm-release",
       "description": "Build WASM release"
-    },
-    {
-      "name": "native-debug",
-      "configurePreset": "native-debug",
-      "description": "Build native debug"
-    },
-    {
-      "name": "native-release",
-      "configurePreset": "native-release",
-      "description": "Build native release"
-    },
-    {
-      "name": "native-no-sdl",
-      "configurePreset": "native-no-sdl",
-      "description": "Build native debug without SDL3"
-    },
-    {
-      "name": "native-sdl3-debug",
-      "configurePreset": "native-sdl3-debug",
-      "description": "Legacy alias for native-debug"
-    },
-    {
-      "name": "native-sdl3-release",
-      "configurePreset": "native-sdl3-release",
-      "description": "Legacy alias for native-release"
-    },
-    {
-      "name": "native-headless",
-      "configurePreset": "native-headless",
-      "description": "Legacy alias for native-no-sdl"
-    },
-    {
-      "name": "android-debug",
-      "configurePreset": "android-debug",
-      "description": "Build Android debug"
-    },
-    {
-      "name": "android-release",
-      "configurePreset": "android-release",
-      "description": "Build Android release"
-    },
-    {
-      "name": "ios-debug",
-      "configurePreset": "ios-debug",
-      "description": "Build iOS debug",
-      "configuration": "Debug"
-    },
-    {
-      "name": "ios-release",
-      "configurePreset": "ios-release",
-      "description": "Build iOS release",
-      "configuration": "Release"
     }
   ]
 }
