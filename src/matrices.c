@@ -13,14 +13,6 @@ float MagnitudeSq(vec3 v);
 vec3  Normalized(vec3 v);
 float DEG2RAD(float degrees);
 
-/* Remove the #ifndef CMP / #define CMP block entirely */
-
-
-#ifndef CMP
-#define CMP(x, y) \
-    (fabsf((x) - (y)) <= FLT_EPSILON * fmaxf(1.0f, fmaxf(fabsf(x), fabsf(y))))
-#endif
-
 /* ---------- simple constructors / helpers ---------- */
 
 mat2 mat2_identity(void) {
