@@ -13,7 +13,7 @@ Circle containing_circle(Point2D* points, int count) {
     }
 
     // Compute centroid
-    Point2D center = {0, 0};
+    Point2D center = { .x = 0.0f, .y = 0.0f };
     for (int i = 0; i < count; ++i) {
         center = vec2_add(center, points[i]);
     }

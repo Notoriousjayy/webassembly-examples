@@ -49,7 +49,7 @@ static inline Circle circle_create(Point2D position, float radius) {
 }
 
 static inline Circle circle_default(void) {
-    return (Circle){ .position = {0.0f, 0.0f}, .radius = 0.0f };
+    return (Circle){ .position = { .x = 0.0f, .y = 0.0f }, .radius = 0.0f };
 }
 
 static inline Rectangle2D rectangle2d_create(Point2D origin, vec2 size) {
@@ -57,7 +57,10 @@ static inline Rectangle2D rectangle2d_create(Point2D origin, vec2 size) {
 }
 
 static inline Rectangle2D rectangle2d_default(void) {
-    return (Rectangle2D){ .origin = {0.0f, 0.0f}, .size = {0.0f, 0.0f} };
+    return (Rectangle2D){
+        .origin = { .x = 0.0f, .y = 0.0f },
+        .size = { .x = 0.0f, .y = 0.0f }
+    };
 }
 
 #endif /* GEOMETRY2D_TYPES_H */

@@ -12,9 +12,12 @@ set(SERVE_HOST "0.0.0.0" CACHE STRING "Dev server bind address")
 
 if(NOT EMSCRIPTEN AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     message(FATAL_ERROR
-        "This project is now WebAssembly-only. Activate Emscripten and configure with:\n"
-        "  emcmake cmake --preset wasm-debug\n"
-        "or\n"
+        "This project is now WebAssembly-only. Activate Emscripten and configure with:
+"
+        "  emcmake cmake --preset wasm-debug
+"
+        "or
+"
         "  emcmake cmake --preset wasm-release")
 endif()
 
@@ -26,7 +29,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/src/*.c"
 )
 
-list(FILTER SOURCES EXCLUDE REGEX ".*/render_native\\.c$")
+list(FILTER SOURCES EXCLUDE REGEX ".*/render_native\.c$")
 list(SORT SOURCES)
 
 add_executable(testProject ${SOURCES})
@@ -43,9 +46,6 @@ target_compile_options(testProject PRIVATE
     -Wextra
     -Wpedantic
     "SHELL:-sUSE_SDL=3"
-    "SHELL:-sUSE_WEBGL2=1"
-    "SHELL:-sMIN_WEBGL_VERSION=2"
-    "SHELL:-sMAX_WEBGL_VERSION=2"
 )
 
 target_link_options(testProject PRIVATE
