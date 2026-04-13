@@ -1,29 +1,50 @@
-#ifndef _H_GL_WINDOW_
-#define _H_GL_WINDOW_
+#ifndef TESTPROJECT_GLWINDOW_H
+#define TESTPROJECT_GLWINDOW_H
 
-// GLWindow - OpenGL/WebGL Window Management
-// This header provides the rendering context and window interface.
-// For WebAssembly builds, this integrates with the HTML5 canvas.
+#include <stdbool.h>
 
-// Forward declarations for window dimensions (if needed by Camera)
-// The actual implementation depends on the platform target.
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/html5.h>
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-// Window state structure (extend as needed)
-struct GLWindowState {
+/*
+ * Lightweight window-state compatibility header.
+ *
+ * This project is written in C, so this interface intentionally avoids stale
+ * C++ references. Platform-specific implementations may provide these accessors
+ * where needed; code that only needs the type can include this header safely on
+ * every target.
+ */
+typedef struct GLWindowState {
     int width;
     int height;
-    bool isFullscreen;
-    bool isVisible;
-};
+    bool is_fullscreen;
+    bool is_visible;
+} GLWindowState;
 
-// Function declarations (implement in GLWindow.cpp)
-int GetWindowWidth();
-int GetWindowHeight();
-float GetWindowAspect();
+/* Optional platform-specific accessors. */
+int glwindow_get_width(void);
+int glwindow_get_height(void);
+float glwindow_get_aspect(void);
 
+/*
+ * Legacy compatibility aliases.
+ * Keep older callers building while steering new code toward the lowercase API.
+ */
+static inline int GetWindowWidth(void) {
+    return glwindow_get_width();
+}
+
+static inline int GetWindowHeight(void) {
+    return glwindow_get_height();
+}
+
+static inline float GetWindowAspect(void) {
+    return glwindow_get_aspect();
+}
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* TESTPROJECT_GLWINDOW_H */

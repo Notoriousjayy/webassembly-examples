@@ -1,5 +1,5 @@
-# CodeQL security analysis
-name: CodeQL (C/C++)
+# CodeQL security analysis for the C codebase
+name: CodeQL (C)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: "0 6 * * 1"  # Weekly on Mondays
+    - cron: "0 6 * * 1"
 
 permissions:
   contents: read
@@ -23,7 +23,8 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: cpp
+          languages: c-cpp
+          build-mode: manual
 
       - name: Install Emscripten
         shell: bash
@@ -32,15 +33,16 @@ jobs:
           git clone https://github.com/emscripten-core/emsdk.git "$EMSDK"
           "$EMSDK/emsdk" install latest
           "$EMSDK/emsdk" activate latest
-          echo "EMSDK=$EMSDK" >> $GITHUB_ENV
-          source "$EMSDK/emsdk_env.sh"
+          echo "EMSDK=$EMSDK" >> "$GITHUB_ENV"
 
       - name: Build for CodeQL
         shell: bash
         run: |
           source "$EMSDK/emsdk_env.sh"
           emcmake cmake --preset wasm-debug
-          cmake --build --preset wasm-debug -j2
+          cmake --build --preset wasm-debug --parallel 2
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:c-cpp"

@@ -64,6 +64,24 @@
       "description": "Native build without SDL3 (math / core modules only)"
     },
     {
+      "name": "native-sdl3-debug",
+      "hidden": true,
+      "inherits": "native-debug",
+      "description": "Legacy alias for native-debug"
+    },
+    {
+      "name": "native-sdl3-release",
+      "hidden": true,
+      "inherits": "native-release",
+      "description": "Legacy alias for native-release"
+    },
+    {
+      "name": "native-headless",
+      "hidden": true,
+      "inherits": "native-no-sdl",
+      "description": "Legacy alias for native-no-sdl"
+    },
+    {
       "name": "android-debug",
       "displayName": "Android / Debug",
       "inherits": "base",
@@ -136,6 +154,21 @@
       "name": "native-no-sdl",
       "configurePreset": "native-no-sdl",
       "description": "Build native debug without SDL3"
+    },
+    {
+      "name": "native-sdl3-debug",
+      "configurePreset": "native-sdl3-debug",
+      "description": "Legacy alias for native-debug"
+    },
+    {
+      "name": "native-sdl3-release",
+      "configurePreset": "native-sdl3-release",
+      "description": "Legacy alias for native-release"
+    },
+    {
+      "name": "native-headless",
+      "configurePreset": "native-headless",
+      "description": "Legacy alias for native-no-sdl"
     },
     {
       "name": "android-debug",

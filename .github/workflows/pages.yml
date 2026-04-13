@@ -1,4 +1,4 @@
-# Deploy to GitHub Pages
+# Deploy the optimized WebAssembly build to GitHub Pages
 name: Deploy (GitHub Pages)
 
 on:
@@ -38,12 +38,12 @@ jobs:
             /tmp/emsdk/upstream/emscripten/cache
           key: emsdk-${{ runner.os }}-latest
 
-      - name: Configure & Build
+      - name: Configure & Build (release)
         shell: bash
         run: |
           source /tmp/emsdk/emsdk_env.sh
-          emcmake cmake --preset wasm-debug
-          cmake --build --preset wasm-debug -j2
+          emcmake cmake --preset wasm-release
+          cmake --build --preset wasm-release --parallel 2
 
       - name: Prepare site directory
         run: |

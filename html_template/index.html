@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Graphics Test Bed</title>
+  <title>testProject</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     html, body { margin: 0; height: 100%; background: #111; }
@@ -12,7 +12,7 @@
 <body>
   <canvas id="canvas" width="800" height="600"></canvas>
 
-  <!-- Configure Module BEFORE the generated script is injected -->
+  <!-- Configure Module before the generated script is injected. -->
   <script>
     var Module = {
       canvas: (function () { return document.getElementById('canvas'); })(),
@@ -33,7 +33,7 @@
     };
   </script>
 
-  <!-- REQUIRED by Emscripten: this placeholder injects the generated JS -->
+  <!-- Required by Emscripten: this placeholder injects the generated JS. -->
   {{{ SCRIPT }}}
 </body>
 </html>

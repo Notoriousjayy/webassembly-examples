@@ -1,71 +1,39 @@
 # Build Guide
 
-This project supports multiple build configurations for both native platforms (using SDL3) and WebAssembly (using Emscripten).
-
-## Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Build Configurations](#build-configurations)
-- [Platform-Specific Notes](#platform-specific-notes)
-- [Troubleshooting](#troubleshooting)
-
----
+This project supports WebAssembly builds with Emscripten and native desktop/mobile
+builds through CMake presets. The codebase is configured for **C23**, not C99.
 
 ## Prerequisites
 
-### Common Requirements
+### Common requirements
 
 - **CMake** 3.20 or higher
-- **Ninja** build system (recommended) or Make
-- **C99-compatible compiler** (GCC, Clang, MSVC)
+- **Ninja** (recommended) or another supported generator
+- A **C23-capable compiler**
+  - GCC 13+
+  - Clang 16+
+  - MSVC with C23 support enabled for this project configuration
 
-### For Native Builds (SDL3)
+### Native renderer requirements
 
-SDL3 will be automatically downloaded and built if not found on your system.
+Native renderer builds require **SDL3** to be installed and discoverable by CMake.
+Unlike some earlier documentation, the current `CMakeLists.txt` does **not**
+download SDL3 automatically.
 
-**Optional: Manual SDL3 Installation**
-
-#### Linux (Ubuntu/Debian)
-```bash
-# Build from source (recommended)
-git clone https://github.com/libsdl-org/SDL.git
-cd SDL
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
-sudo make install
-```
-
-#### macOS
-```bash
-# Using Homebrew
-brew install sdl3
-
-# Or build from source
-git clone https://github.com/libsdl-org/SDL.git
-cd SDL
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(sysctl -n hw.ncpu)
-sudo make install
-```
-
-#### Windows
-```powershell
-# Using vcpkg
-vcpkg install sdl3:x64-windows
-
-# Or download prebuilt binaries from:
-# https://github.com/libsdl-org/SDL/releases
-```
-
-### For WebAssembly Builds
-
-- **Emscripten SDK** (emsdk)
+If SDL3 is installed in a non-standard location, configure CMake with one of:
 
 ```bash
-# Install Emscripten
+-DCMAKE_PREFIX_PATH=/path/to/sdl3
+-DSDL3_DIR=/path/to/sdl3/lib/cmake/SDL3
+```
+
+If you only want the math/core modules, use the `native-no-sdl` preset instead.
+
+### WebAssembly requirements
+
+Install and activate the Emscripten SDK:
+
+```bash
 git clone https://github.com/emscripten-core/emsdk.git
 cd emsdk
 ./emsdk install latest
@@ -73,339 +41,165 @@ cd emsdk
 source ./emsdk_env.sh
 ```
 
----
+## Quick start
 
-## Quick Start
-
-### Native Build (SDL3 + OpenGL)
+### Native debug build with SDL3 + OpenGL
 
 ```bash
-# Configure
-cmake --preset native-sdl3-debug
-
-# Build
-cmake --build --preset native-sdl3-debug
-
-# Run
-./build-native-debug/bin/testProject
+cmake --preset native-debug
+cmake --build --preset native-debug
+./build-native/testProject
 ```
 
-### WebAssembly Build
+### Native debug build without SDL3
 
 ```bash
-# Activate Emscripten environment
+cmake --preset native-no-sdl
+cmake --build --preset native-no-sdl
+./build-native/testProject
+```
+
+### WebAssembly debug build
+
+```bash
 source /path/to/emsdk/emsdk_env.sh
-
-# Configure
 emcmake cmake --preset wasm-debug
-
-# Build
 cmake --build --preset wasm-debug
-
-# Serve locally
-cmake --build build-wasm-debug --target serve
-# Open http://localhost:8000 in your browser
+cmake --build build-wasm --target serve
+# Open http://localhost:8000
 ```
 
----
+### WebAssembly release build
 
-## Build Configurations
+```bash
+source /path/to/emsdk/emsdk_env.sh
+emcmake cmake --preset wasm-release
+cmake --build --preset wasm-release
+```
 
-### Available Presets
+## Presets
 
-| Preset | Platform | Graphics | Build Type | Description |
+### Canonical presets
+
+| Preset | Platform | Graphics | Build type | Description |
 |--------|----------|----------|------------|-------------|
-| `wasm-debug` | WebAssembly | WebGL2 | Debug | WASM with debug symbols and assertions |
-| `wasm-release` | WebAssembly | WebGL2 | Release | Optimized WASM for production |
-| `native-sdl3-debug` | Native | SDL3+OpenGL | Debug | Native build with debugging |
-| `native-sdl3-release` | Native | SDL3+OpenGL | Release | Optimized native build |
-| `native-headless` | Native | None | Debug | Console-only build (no graphics) |
-| `native-tests` | Native | SDL3+OpenGL | Debug | Build with unit tests enabled |
+| `wasm-debug` | WebAssembly | WebGL2 | Debug | Debug-friendly WASM build |
+| `wasm-release` | WebAssembly | WebGL2 | Release | Optimized WASM build |
+| `native-debug` | Desktop | SDL3 + OpenGL | Debug | Native desktop renderer build |
+| `native-release` | Desktop | SDL3 + OpenGL | Release | Optimized native desktop build |
+| `native-no-sdl` | Desktop | None | Debug | Core/math build without renderer |
+| `android-debug` | Android | SDL3 + OpenGL ES 3.0 | Debug | Android debug build |
+| `android-release` | Android | SDL3 + OpenGL ES 3.0 | Release | Android release build |
+| `ios-debug` | iOS | SDL3 + OpenGL ES 3.0 | Debug | iOS debug build |
+| `ios-release` | iOS | SDL3 + OpenGL ES 3.0 | Release | iOS release build |
 
-### Using Presets
+### Legacy preset aliases
+
+The preset file also preserves these compatibility aliases for older scripts and
+notes:
+
+- `native-sdl3-debug` → `native-debug`
+- `native-sdl3-release` → `native-release`
+- `native-headless` → `native-no-sdl`
+
+## Platform notes
+
+### Linux packages
 
 ```bash
-# List all available presets
-cmake --list-presets
-
-# Configure with a preset
-cmake --preset <preset-name>
-
-# Build with a preset
-cmake --build --preset <preset-name>
-
-# Run tests (for native-tests preset)
-ctest --preset native-tests
-```
-
----
-
-## Platform-Specific Notes
-
-### Linux
-
-**Required system packages:**
-```bash
-# Ubuntu/Debian
 sudo apt install build-essential cmake ninja-build \
                  libgl1-mesa-dev libxext-dev
-
-# Fedora/RHEL
-sudo dnf install gcc gcc-c++ cmake ninja-build \
-                 mesa-libGL-devel libXext-devel
-
-# Arch Linux
-sudo pacman -S base-devel cmake ninja mesa
 ```
 
-**Building:**
-```bash
-cmake --preset native-sdl3-debug
-cmake --build --preset native-sdl3-debug -j$(nproc)
-./build-native-debug/bin/testProject
-```
+### macOS tools
 
-### macOS
-
-**Required tools:**
 ```bash
-# Install Xcode Command Line Tools
 xcode-select --install
-
-# Install CMake and Ninja (via Homebrew)
 brew install cmake ninja
-```
-
-**Building:**
-```bash
-cmake --preset native-sdl3-debug
-cmake --build --preset native-sdl3-debug -j$(sysctl -n hw.ncpu)
-./build-native-debug/bin/testProject
 ```
 
 ### Windows
 
-**Using Visual Studio 2022:**
+Visual Studio or MinGW/MSYS2 can be used, but the preset names remain the same:
+
 ```powershell
-# Configure (Visual Studio will be auto-detected)
-cmake -B build -DUSE_SDL3=ON
-
-# Build
-cmake --build build --config Debug
-
-# Run
-.\build\bin\Debug\testProject.exe
+cmake --preset native-debug
+cmake --build --preset native-debug
 ```
 
-**Using MinGW/MSYS2:**
-```bash
-# In MSYS2 shell
-cmake --preset native-sdl3-debug -G "MinGW Makefiles"
-cmake --build --preset native-sdl3-debug -j$(nproc)
-./build-native-debug/bin/testProject.exe
-```
+## Useful commands
 
-### WebAssembly
-
-**Building:**
-```bash
-# Set up Emscripten environment
-source /path/to/emsdk/emsdk_env.sh
-
-# Configure
-emcmake cmake --preset wasm-debug
-
-# Build
-cmake --build --preset wasm-debug
-
-# Output files will be in build-wasm-debug/
-# - index.html (entry point)
-# - index.js (JavaScript glue code)
-# - index.wasm (WebAssembly binary)
-```
-
-**Local testing:**
-```bash
-# Start development server (requires Python 3)
-cmake --build build-wasm-debug --target serve
-
-# Or use any static file server:
-cd build-wasm-debug
-python3 -m http.server 8000
-# Open http://localhost:8000
-```
-
----
-
-## Advanced Build Options
-
-### Custom Build Configurations
+List presets:
 
 ```bash
-# Disable SDL3 (console-only build)
-cmake -B build -DUSE_SDL3=OFF
-
-# Custom server port for WASM builds
-cmake --preset wasm-debug -DSERVE_PORT=3000
-
-# Enable tests
-cmake --preset native-tests -DENABLE_TESTS=ON
-
-# Custom SDL3 installation path
-cmake --preset native-sdl3-debug -DCMAKE_PREFIX_PATH=/custom/sdl3/path
+cmake --list-presets
 ```
 
-### Optimization Levels
+Clean build directories:
 
-**Native:**
 ```bash
-# Debug with sanitizers (Linux/macOS)
-cmake -B build-sanitized -DUSE_SDL3=ON \
-      -DCMAKE_BUILD_TYPE=Debug \
-      -DCMAKE_C_FLAGS="-fsanitize=address,undefined"
-
-# Release with LTO
-cmake -B build-lto -DUSE_SDL3=ON \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
+rm -rf build-*
 ```
 
-**WebAssembly:**
+Use stronger release optimization for WASM:
+
 ```bash
-# Maximum optimization
-emcmake cmake --preset wasm-release \
-              -DCMAKE_C_FLAGS="-O3 -flto"
-
-# Smallest binary size
-emcmake cmake --preset wasm-release \
-              -DCMAKE_C_FLAGS="-Oz -flto"
+emcmake cmake --preset wasm-release -DCMAKE_C_FLAGS="-O3 -flto"
 ```
 
----
+Minimize binary size for WASM:
+
+```bash
+emcmake cmake --preset wasm-release -DCMAKE_C_FLAGS="-Oz -flto"
+```
 
 ## Troubleshooting
 
-### SDL3 Not Found
+### `emcmake: command not found`
 
-**Error:** `SDL3 not found locally, fetching from GitHub...`
-
-**Solution:** This is normal. CMake will automatically download and build SDL3. If you want to use a system-installed version:
+Activate Emscripten first:
 
 ```bash
-# Install SDL3 first, then:
-cmake --preset native-sdl3-debug -DCMAKE_PREFIX_PATH=/usr/local
-```
-
-### Emscripten Errors
-
-**Error:** `emcmake: command not found`
-
-**Solution:**
-```bash
-# Make sure Emscripten is activated
 source /path/to/emsdk/emsdk_env.sh
-
-# Verify installation
 emcc --version
 ```
 
-**Error:** `WebGL context creation failed`
+### SDL3 not found
 
-**Solution:**
-- Ensure your browser supports WebGL2
-- Check browser console for detailed errors
-- Try a different browser (Chrome, Firefox, Edge recommended)
+Install SDL3 and point CMake at it explicitly:
 
-### OpenGL Errors (Native)
-
-**Error:** `Failed to create OpenGL context`
-
-**Solution:**
 ```bash
-# Linux: Install mesa drivers
-sudo apt install mesa-utils
-glxinfo | grep "OpenGL version"
-
-# macOS: Update to latest OS version
-# Windows: Update graphics drivers
+cmake --preset native-debug -DCMAKE_PREFIX_PATH=/usr/local
 ```
 
-### Build Errors
+Or use the non-renderer preset:
 
-**Error:** `No CMAKE_C_COMPILER could be found`
-
-**Solution:**
 ```bash
-# Linux
+cmake --preset native-no-sdl
+```
+
+### WebGL context creation failed
+
+- Verify that the browser supports WebGL2
+- Check the browser console for details
+- Try Chrome, Firefox, or Edge
+
+### No C compiler found
+
+Install a C toolchain:
+
+```bash
 sudo apt install build-essential
-
-# macOS
-xcode-select --install
-
-# Windows
-# Install Visual Studio with C++ workload
 ```
 
-**Error:** `Ninja not found`
+## Continuous integration
 
-**Solution:**
-```bash
-# Option 1: Install Ninja
-sudo apt install ninja-build  # Linux
-brew install ninja            # macOS
+The repository includes workflows for:
 
-# Option 2: Use Make instead
-cmake --preset native-sdl3-debug -G "Unix Makefiles"
-```
+- WebAssembly builds
+- GitHub Pages deployment
+- CodeQL scanning
+- Release packaging
+- Dependency review
 
----
-
-## Testing
-
-```bash
-# Build with tests enabled
-cmake --preset native-tests
-
-# Run all tests
-ctest --preset native-tests
-
-# Run specific test
-ctest --preset native-tests -R polygon_tests
-
-# Verbose output
-ctest --preset native-tests --output-on-failure
-```
-
----
-
-## Continuous Integration
-
-The project includes GitHub Actions workflows:
-
-- **build-wasm.yml** - Builds WebAssembly artifacts
-- **codeql.yml** - Security analysis
-- **pages.yml** - Deploys to GitHub Pages
-- **release.yml** - Creates release packages
-
-See `.github/workflows/` for details.
-
----
-
-## Clean Build
-
-```bash
-# Remove build directories
-rm -rf build-*
-
-# Or clean specific configuration
-cmake --build build-native-debug --target clean
-```
-
----
-
-## Additional Resources
-
-- [SDL3 Documentation](https://wiki.libsdl.org/SDL3/)
-- [Emscripten Documentation](https://emscripten.org/docs/)
-- [CMake Documentation](https://cmake.org/documentation/)
-- [Project Issues](https://github.com/yourusername/yourrepo/issues)
+See `.github/workflows/` for the concrete workflow definitions.
