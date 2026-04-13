@@ -10,6 +10,7 @@
 #include <SDL3/SDL.h>
 #include <GLES3/gl3.h>
 #include <emscripten/emscripten.h>
+#include <emscripten/html5.h>
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -185,7 +186,10 @@ static void sync_viewport(void)
     int width = 0;
     int height = 0;
 
-    if (emscripten_get_canvas_element_size("#canvas", &width, &height) != EMSCRIPTEN_RESULT_SUCCESS) {
+    const EMSCRIPTEN_RESULT rc =
+        emscripten_get_canvas_element_size("#canvas", &width, &height);
+
+    if (rc != EMSCRIPTEN_RESULT_SUCCESS) {
         width = 1280;
         height = 720;
     }
@@ -457,3 +461,6 @@ void startMainLoop(void)
     printf("[startMainLoop] entering main loop\n");
     emscripten_set_main_loop(tick, 0, 1);
 }
+
+
+

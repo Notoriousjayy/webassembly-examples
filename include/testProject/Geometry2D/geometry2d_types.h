@@ -64,3 +64,5 @@ static inline Rectangle2D rectangle2d_default(void) {
 }
 
 #endif /* GEOMETRY2D_TYPES_H */
+
+

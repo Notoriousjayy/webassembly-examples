@@ -15,8 +15,8 @@ bool line2d_oriented_rectangle(Line2D line, OrientedRectangle rect);
  * Convenience Macros (Argument Order Swapping)
  ******************************************************************************/
 
-#define circle_line2d(circle, line)           line2d_circle(line, circle)
-#define rectangle_line2d(rect, line)          line2d_rectangle(line, rect)
-#define oriented_rectangle_line2d(rect, line) line2d_oriented_rectangle(line, rect)
+#define circle_line2d(circle, line)                      line2d_circle(line, circle)
+#define rectangle_line2d(rect, line)                     line2d_rectangle(line, rect)
+#define oriented_rectangle_line2d(rect, line)            line2d_oriented_rectangle(line, rect)
 
 #endif /* LINE_INTERSECTION_H */
