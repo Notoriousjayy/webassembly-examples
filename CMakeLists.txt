@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.20)
-project(testProject C)
+project(testProject LANGUAGES C)
 
 # --- Options ---------------------------------------------------------------
 option(BUILD_WASM_HTML "Emit an HTML shell for the WASM build (custom template if present)" ON)
 option(USE_SDL3 "Use SDL3 for native desktop/mobile rendering" ON)
-set(CMAKE_C_STANDARD 11)
+
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 # Dev server settings (override with -DSERVE_PORT=5173, etc.)
@@ -34,24 +36,53 @@ else()
     message(STATUS "Platform: Desktop (${CMAKE_SYSTEM_NAME})")
 endif()
 
+# --- Dependency Discovery / Renderer Availability --------------------------
+set(ENABLE_NATIVE_RENDERER OFF)
+
+if(PLATFORM_DESKTOP)
+    if(USE_SDL3)
+        find_package(SDL3 QUIET)
+
+        if(SDL3_FOUND)
+            set(ENABLE_NATIVE_RENDERER ON)
+            if(DEFINED SDL3_VERSION)
+                message(STATUS "Found SDL3: ${SDL3_VERSION}")
+            else()
+                message(STATUS "Found SDL3")
+            endif()
+        else()
+            message(WARNING "SDL3 not found. Building without renderer.")
+            message(STATUS "Install SDL3, set CMAKE_PREFIX_PATH / SDL3_DIR, or reconfigure with -DUSE_SDL3=OFF")
+        endif()
+    else()
+        message(STATUS "Desktop build configured without renderer (USE_SDL3=OFF)")
+    endif()
+elseif(PLATFORM_ANDROID OR PLATFORM_IOS)
+    if(NOT USE_SDL3)
+        message(FATAL_ERROR "Mobile builds require SDL3 (USE_SDL3=ON)")
+    endif()
+
+    find_package(SDL3 REQUIRED)
+    set(ENABLE_NATIVE_RENDERER ON)
+endif()
+
 # --- Sources ---------------------------------------------------------------
-# Start with *all* .c files from src/
-file(GLOB SOURCES CONFIGURE_DEPENDS
+# Collect all implementation files under src/, including subdirectories.
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/src/*.c"
 )
 
-# Platform-specific renderer selection
+# Remove renderer implementations first, then add back only the correct one.
+list(FILTER SOURCES EXCLUDE REGEX ".*/render\\.c$")
+list(FILTER SOURCES EXCLUDE REGEX ".*/render_native\\.c$")
+
 if(PLATFORM_WEB)
-    # WebGL2 renderer for Emscripten
     list(APPEND SOURCES "${CMAKE_SOURCE_DIR}/src/render.c")
-    # Remove render_native.c if it was included
-    list(FILTER SOURCES EXCLUDE REGEX ".*render_native\\.c$")
-elseif(PLATFORM_DESKTOP OR PLATFORM_MOBILE)
-    # SDL3 + OpenGL ES renderer for native platforms
+elseif(ENABLE_NATIVE_RENDERER)
     list(APPEND SOURCES "${CMAKE_SOURCE_DIR}/src/render_native.c")
-    # Remove render.c if it was included
-    list(FILTER SOURCES EXCLUDE REGEX ".*render\\.c$")
 endif()
+
+list(SORT SOURCES)
 
 # --- Target Configuration --------------------------------------------------
 if(PLATFORM_ANDROID)
@@ -72,7 +103,6 @@ target_include_directories(testProject PRIVATE
 
 # --- Web (Emscripten) Configuration ----------------------------------------
 if(PLATFORM_WEB)
-    # Linker flags and exported functions/runtime
     target_link_options(testProject PRIVATE
         "SHELL:-sUSE_WEBGL2=1"
         "SHELL:-sMIN_WEBGL_VERSION=2"
@@ -82,19 +112,18 @@ if(PLATFORM_WEB)
         "SHELL:-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']"
     )
 
-    # Emit index.html / index.js / index.wasm
     set_target_properties(testProject PROPERTIES
         SUFFIX ".html"
         OUTPUT_NAME "index"
     )
 
-    # Optional custom HTML shell / post-js
     if(BUILD_WASM_HTML)
         if(EXISTS "${CMAKE_SOURCE_DIR}/html_template/index.html")
             target_link_options(testProject PRIVATE
                 "SHELL:--shell-file=${CMAKE_SOURCE_DIR}/html_template/index.html"
             )
         endif()
+
         if(EXISTS "${CMAKE_SOURCE_DIR}/html_template/init_runtime.js")
             target_link_options(testProject PRIVATE
                 "SHELL:--post-js=${CMAKE_SOURCE_DIR}/html_template/init_runtime.js"
@@ -102,7 +131,6 @@ if(PLATFORM_WEB)
         endif()
     endif()
 
-    # Development server target
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_custom_target(serve
@@ -118,112 +146,80 @@ if(PLATFORM_WEB)
 
 # --- Desktop Configuration -------------------------------------------------
 elseif(PLATFORM_DESKTOP)
-    # Link math library
-    target_link_libraries(testProject PRIVATE m)
-    
-    if(USE_SDL3)
-        # Find SDL3
-        find_package(SDL3 QUIET)
-        
-        if(SDL3_FOUND)
-            message(STATUS "Found SDL3: ${SDL3_VERSION}")
-            target_link_libraries(testProject PRIVATE SDL3::SDL3)
-            target_compile_definitions(testProject PRIVATE USE_SDL3)
-            
-            # Link OpenGL
-            if(WIN32)
-                # Windows: OpenGL is part of the system
-                target_link_libraries(testProject PRIVATE opengl32)
-            elseif(APPLE)
-                # macOS: Use framework
-                find_library(OPENGL_LIBRARY OpenGL REQUIRED)
-                target_link_libraries(testProject PRIVATE ${OPENGL_LIBRARY})
-            else()
-                # Linux: Find OpenGL
-                find_package(OpenGL REQUIRED)
-                target_link_libraries(testProject PRIVATE OpenGL::GL)
-            endif()
-            
-            message(STATUS "Desktop build configured with SDL3 + OpenGL")
+    if(NOT WIN32)
+        target_link_libraries(testProject PRIVATE m)
+    endif()
+
+    if(ENABLE_NATIVE_RENDERER)
+        target_link_libraries(testProject PRIVATE SDL3::SDL3)
+        target_compile_definitions(testProject PRIVATE USE_SDL3)
+
+        if(WIN32)
+            target_link_libraries(testProject PRIVATE opengl32)
+        elseif(APPLE)
+            find_library(OPENGL_LIBRARY OpenGL REQUIRED)
+            target_link_libraries(testProject PRIVATE ${OPENGL_LIBRARY})
         else()
-            message(WARNING "SDL3 not found. Building without renderer.")
-            message(STATUS "Install SDL3 or disable with -DUSE_SDL3=OFF")
+            find_package(OpenGL REQUIRED)
+            target_link_libraries(testProject PRIVATE OpenGL::GL)
         endif()
-    else()
-        message(STATUS "Desktop build configured without renderer (USE_SDL3=OFF)")
+
+        message(STATUS "Desktop build configured with SDL3 + OpenGL")
     endif()
 
 # --- Android Configuration -------------------------------------------------
 elseif(PLATFORM_ANDROID)
-    # Link math library
-    target_link_libraries(testProject PRIVATE m log)
-    
-    if(USE_SDL3)
-        # Find SDL3 for Android
-        find_package(SDL3 REQUIRED)
-        target_link_libraries(testProject PRIVATE SDL3::SDL3)
-        target_compile_definitions(testProject PRIVATE USE_SDL3 PLATFORM_ANDROID)
-        
-        # Link Android-specific libraries
-        target_link_libraries(testProject PRIVATE
-            android
-            EGL
-            GLESv3
-        )
-        
-        # Set Android-specific properties
-        set_target_properties(testProject PROPERTIES
-            LIBRARY_OUTPUT_NAME "main"
-        )
-        
-        message(STATUS "Android build configured with SDL3 + OpenGL ES 3.0")
-    else()
-        message(FATAL_ERROR "Android builds require SDL3 (USE_SDL3=ON)")
-    endif()
+    target_link_libraries(testProject PRIVATE
+        m
+        log
+        SDL3::SDL3
+        android
+        EGL
+        GLESv3
+    )
+    target_compile_definitions(testProject PRIVATE USE_SDL3 PLATFORM_ANDROID)
+
+    set_target_properties(testProject PROPERTIES
+        LIBRARY_OUTPUT_NAME "main"
+    )
+
+    message(STATUS "Android build configured with SDL3 + OpenGL ES 3.0")
 
 # --- iOS Configuration -----------------------------------------------------
 elseif(PLATFORM_IOS)
-    # Link math library
-    target_link_libraries(testProject PRIVATE m)
-    
-    if(USE_SDL3)
-        # Find SDL3 for iOS
-        find_package(SDL3 REQUIRED)
-        target_link_libraries(testProject PRIVATE SDL3::SDL3)
-        target_compile_definitions(testProject PRIVATE USE_SDL3 PLATFORM_IOS)
-        
-        # Link iOS frameworks
-        find_library(OPENGLES_LIBRARY OpenGLES REQUIRED)
-        find_library(FOUNDATION_LIBRARY Foundation REQUIRED)
-        find_library(UIKIT_LIBRARY UIKit REQUIRED)
-        find_library(COREGRAPHICS_LIBRARY CoreGraphics REQUIRED)
-        find_library(QUARTZCORE_LIBRARY QuartzCore REQUIRED)
-        find_library(METAL_LIBRARY Metal REQUIRED)
-        
-        target_link_libraries(testProject PRIVATE
-            ${OPENGLES_LIBRARY}
-            ${FOUNDATION_LIBRARY}
-            ${UIKIT_LIBRARY}
-            ${COREGRAPHICS_LIBRARY}
-            ${QUARTZCORE_LIBRARY}
-            ${METAL_LIBRARY}
-        )
-        
-        # iOS app bundle properties
-        set_target_properties(testProject PROPERTIES
-            MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourcompany.testproject"
-            MACOSX_BUNDLE_BUNDLE_NAME "TestProject"
-            MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
-            MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
-            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.yourcompany.testproject"
-            XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"  # iPhone and iPad
-            XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "12.0"
-        )
-        
-        message(STATUS "iOS build configured with SDL3 + OpenGL ES 3.0")
-    else()
-        message(FATAL_ERROR "iOS builds require SDL3 (USE_SDL3=ON)")
-    endif()
+    target_link_libraries(testProject PRIVATE
+        m
+        SDL3::SDL3
+    )
+    target_compile_definitions(testProject PRIVATE USE_SDL3 PLATFORM_IOS)
+
+    find_library(OPENGLES_LIBRARY OpenGLES REQUIRED)
+    find_library(FOUNDATION_LIBRARY Foundation REQUIRED)
+    find_library(UIKIT_LIBRARY UIKit REQUIRED)
+    find_library(COREGRAPHICS_LIBRARY CoreGraphics REQUIRED)
+    find_library(QUARTZCORE_LIBRARY QuartzCore REQUIRED)
+    find_library(METAL_LIBRARY Metal REQUIRED)
+
+    target_link_libraries(testProject PRIVATE
+        ${OPENGLES_LIBRARY}
+        ${FOUNDATION_LIBRARY}
+        ${UIKIT_LIBRARY}
+        ${COREGRAPHICS_LIBRARY}
+        ${QUARTZCORE_LIBRARY}
+        ${METAL_LIBRARY}
+    )
+
+    set_target_properties(testProject PROPERTIES
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourcompany.testproject"
+        MACOSX_BUNDLE_BUNDLE_NAME "TestProject"
+        MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.yourcompany.testproject"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+        XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "12.0"
+    )
+
+    message(STATUS "iOS build configured with SDL3 + OpenGL ES 3.0")
 endif()
 
 # --- Compiler Warnings -----------------------------------------------------
@@ -238,15 +234,17 @@ message(STATUS "=== Build Configuration Summary ===")
 message(STATUS "Platform: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "C Standard: ${CMAKE_C_STANDARD}")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+
 if(PLATFORM_WEB)
     message(STATUS "Renderer: WebGL2 (Emscripten)")
-elseif(USE_SDL3 AND (SDL3_FOUND OR PLATFORM_MOBILE))
+elseif(ENABLE_NATIVE_RENDERER)
     if(PLATFORM_DESKTOP)
-        message(STATUS "Renderer: SDL3 + OpenGL 3.3")
+        message(STATUS "Renderer: SDL3 + OpenGL")
     elseif(PLATFORM_ANDROID OR PLATFORM_IOS)
         message(STATUS "Renderer: SDL3 + OpenGL ES 3.0")
     endif()
 else()
     message(STATUS "Renderer: None")
 endif()
+
 message(STATUS "==================================")

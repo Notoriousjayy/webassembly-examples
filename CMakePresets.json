@@ -31,7 +31,8 @@
       "inherits": "wasm-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
-      }
+      },
+      "description": "Optimized WebAssembly build"
     },
     {
       "name": "native-debug",
@@ -50,7 +51,8 @@
       "inherits": "native-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
-      }
+      },
+      "description": "Optimized native desktop build with SDL3 + OpenGL"
     },
     {
       "name": "native-no-sdl",
@@ -59,7 +61,7 @@
       "cacheVariables": {
         "USE_SDL3": "OFF"
       },
-      "description": "Native build without SDL3 (math library only)"
+      "description": "Native build without SDL3 (math / core modules only)"
     },
     {
       "name": "android-debug",
@@ -81,7 +83,8 @@
       "inherits": "android-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
-      }
+      },
+      "description": "Optimized Android build with SDL3 + OpenGL ES 3.0"
     },
     {
       "name": "ios-debug",
@@ -104,7 +107,8 @@
       "inherits": "ios-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
-      }
+      },
+      "description": "Optimized iOS build with SDL3 + OpenGL ES 3.0"
     }
   ],
   "buildPresets": [
@@ -127,6 +131,11 @@
       "name": "native-release",
       "configurePreset": "native-release",
       "description": "Build native release"
+    },
+    {
+      "name": "native-no-sdl",
+      "configurePreset": "native-no-sdl",
+      "description": "Build native debug without SDL3"
     },
     {
       "name": "android-debug",
