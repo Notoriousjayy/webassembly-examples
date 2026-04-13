@@ -34,6 +34,8 @@ add_executable(testProject ${SOURCES})
 target_include_directories(testProject PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/include/testProject
+    ${CMAKE_SOURCE_DIR}/include/testProject/Geometry2D
+    ${CMAKE_SOURCE_DIR}/include/testProject/Geometry3D
 )
 
 target_compile_options(testProject PRIVATE

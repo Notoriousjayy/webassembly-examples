@@ -1,30 +1,63 @@
-#ifndef BOUNDING_SHAPE_H
-#define BOUNDING_SHAPE_H
+#ifndef GEOMETRY2D_TYPES_H
+#define GEOMETRY2D_TYPES_H
 
-#include "geometry2d_types.h"
+#include <stddef.h>
+#include "../vectors.h"
 
-/*******************************************************************************
- * BoundingShape Tests
- ******************************************************************************/
+typedef vec2 Point2D;
 
-bool point_in_bounding_shape(BoundingShape shape, Point2D point);
+typedef struct Line2D {
+    Point2D start;
+    Point2D end;
+} Line2D;
 
-#ifndef NO_EXTRAS
-bool line2d_bounding_shape(Line2D line, BoundingShape shape);
-bool circle_bounding_shape(Circle circle, BoundingShape shape);
-bool rectangle_bounding_shape(Rectangle2D rect, BoundingShape shape);
-bool oriented_rectangle_bounding_shape(OrientedRectangle rect, BoundingShape shape);
-#endif
+typedef struct Circle {
+    Point2D position;
+    float radius;
+} Circle;
 
-/*******************************************************************************
- * Convenience Macros (Argument Order Swapping)
- ******************************************************************************/
+typedef struct Rectangle2D {
+    Point2D origin;
+    vec2 size;
+} Rectangle2D;
 
-#ifndef NO_EXTRAS
-#define bounding_shape_line2d(shape, line)                  line2d_bounding_shape(line, shape)
-#define bounding_shape_circle(shape, circle)                circle_bounding_shape(circle, shape)
-#define bounding_shape_rectangle(shape, rect)               rectangle_bounding_shape(rect, shape)
-#define bounding_shape_oriented_rectangle(shape, rect)      oriented_rectangle_bounding_shape(rect, shape)
-#endif
+typedef struct OrientedRectangle {
+    Point2D position;
+    vec2 half_extents;
+    float rotation; /* degrees */
+} OrientedRectangle;
 
-#endif // BOUNDING_SHAPE_H
+typedef struct Interval2D {
+    float min;
+    float max;
+} Interval2D;
+
+typedef struct BoundingShape {
+    Circle *circles;
+    int num_circles;
+    Rectangle2D *rectangles;
+    int num_rectangles;
+} BoundingShape;
+
+/* Small constructors/defaults used by current sources */
+static inline Line2D line2d_create(Point2D start, Point2D end) {
+    return (Line2D){ .start = start, .end = end };
+}
+
+static inline Circle circle_create(Point2D position, float radius) {
+    return (Circle){ .position = position, .radius = radius };
+}
+
+static inline Circle circle_default(void) {
+    return (Circle){ .position = {0.0f, 0.0f}, .radius = 0.0f };
+}
+
+static inline Rectangle2D rectangle2d_create(Point2D origin, vec2 size) {
+    return (Rectangle2D){ .origin = origin, .size = size };
+}
+
+static inline Rectangle2D rectangle2d_default(void) {
+    return (Rectangle2D){ .origin = {0.0f, 0.0f}, .size = {0.0f, 0.0f} };
+}
+
+#endif /* GEOMETRY2D_TYPES_H */
