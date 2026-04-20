@@ -1,0 +1,4 @@
+name: Notoriousjayy/webassembly-examples-codeql-pack
+version: 0.0.1
+library: true
+dependencies: {}
